@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Login do Jogo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: url('matrix.gif') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #00ff00;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    input[type="password"] {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: rgba(128, 128, 128, 0.4);
+      color: #00ff00;
+      font-size: 16px;
+      outline: none;
+      width: 200px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #00ff00;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #00cc00;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Digite a senha para começar:</h2>
+    <input type="password" id="senhaInput">
+    <br>
+    <button onclick="verificarSenha()" id="botaoSenha">Entrar</button>
+  </div>
+
+  <script>
+    function verificarSenha() {
+      const senhaCorreta = "segredo123";
+      const senhaDigitada = document.getElementById("senhaInput").value;
+      if (senhaDigitada === senhaCorreta) {
+        window.location.href = "enigma.html";
+      } else {
+        alert("Senha incorreta!");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("senhaInput").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+          document.getElementById("botaoSenha").click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

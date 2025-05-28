@@ -25,33 +25,6 @@
       text-align: center;
     }
 
-    input[type="text"] {
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      background-color: rgba(128, 128, 128, 0.4);
-      color: #00ff00;
-      font-size: 16px;
-      outline: none;
-      width: 60px;
-      text-align: center;
-      text-transform: uppercase;
-    }
-
-    button {
-      margin: 10px 5px 0 5px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      background-color: #00ff00;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .hidden { display: none; }
-
     .letters {
       display: flex;
       justify-content: center;
@@ -67,6 +40,7 @@
       cursor: grab;
       user-select: none;
       font-size: 24px;
+      touch-action: none;
     }
 
     .dropzone {
@@ -84,17 +58,46 @@
       color: red;
       font-size: 16px;
     }
+
+    .keyboard {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .key-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .key, button {
+      width: 80px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      background-color: #00ff00;
+      color: black;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="container" id="fase1">
     <h2>Insira as letras que encontrou:</h2>
-    <input type="text" maxlength="1" id="letraInput">
-    <br>
-    <button onclick="adicionarLetra()">Adicionar Letra</button>
     <p id="statusLetras">Faltam 4 letras...</p>
     <p>Letras encontradas: <span id="letrasDigitadas"></span></p>
     <p class="error-message" id="erroFase1"></p>
+    <div class="keyboard" id="tecladoVirtual"></div>
   </div>
 
   <div class="container hidden" id="fase2">
@@ -111,9 +114,30 @@
     const letrasNecessarias = palavra.split('');
     let letrasInseridas = [];
 
-    function adicionarLetra() {
-      const input = document.getElementById("letraInput");
-      const letra = input.value.toUpperCase();
+    document.addEventListener("DOMContentLoaded", () => {
+      const teclado = document.getElementById("tecladoVirtual");
+      const layoutQWERTY = [
+        ["Q","W","E","R","T","Y","U","I","O","P"],
+        ["A","S","D","F","G","H","J","K","L"],
+        ["Z","X","C","V","B","N","M"]
+      ];
+      layoutQWERTY.forEach(linha => {
+        const linhaDiv = document.createElement("div");
+        linhaDiv.className = "key-row";
+        linha.forEach(letra => {
+          const tecla = document.createElement("div");
+          tecla.className = "key";
+          tecla.innerText = letra;
+          tecla.onclick = () => {
+            adicionarLetra(letra);
+          };
+          linhaDiv.appendChild(tecla);
+        });
+        teclado.appendChild(linhaDiv);
+      });
+    });
+
+    function adicionarLetra(letra) {
       const erro = document.getElementById("erroFase1");
       erro.innerText = "";
 
@@ -121,10 +145,7 @@
         letrasInseridas.push(letra);
         document.getElementById("letrasDigitadas").innerText = letrasInseridas.join(' ');
         let faltam = 4 - letrasInseridas.length;
-        document.getElementById("statusLetras").innerText = faltam > 0 ? `Faltam ${
-          faltam
-        } letras...` : "Todas as letras encontradas!";
-        input.value = "";
+        document.getElementById("statusLetras").innerText = faltam > 0 ? `Faltam ${faltam} letras...` : "Todas as letras encontradas!";
 
         if (letrasInseridas.length === 4) {
           iniciarFase2();
