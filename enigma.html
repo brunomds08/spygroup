@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Desafio INFO</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: url('matrix.gif') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #00ff00;
+      flex-direction: column;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: rgba(128, 128, 128, 0.4);
+      color: #00ff00;
+      font-size: 16px;
+      outline: none;
+      width: 60px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    button {
+      margin: 10px 5px 0 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #00ff00;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .hidden { display: none; }
+
+    .letters {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .letter {
+      padding: 15px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border: 2px dashed #00ff00;
+      cursor: grab;
+      user-select: none;
+      font-size: 24px;
+    }
+
+    .dropzone {
+      border: 2px dashed #00ff00;
+      min-width: 50px;
+      min-height: 40px;
+      margin: 5px;
+      text-align: center;
+      font-size: 24px;
+      line-height: 40px;
+    }
+
+    .error-message {
+      margin-top: 15px;
+      color: red;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="fase1">
+    <h2>Insira as letras que encontrou:</h2>
+    <input type="text" maxlength="1" id="letraInput">
+    <br>
+    <button onclick="adicionarLetra()">Adicionar Letra</button>
+    <p id="statusLetras">Faltam 4 letras...</p>
+    <p>Letras encontradas: <span id="letrasDigitadas"></span></p>
+    <p class="error-message" id="erroFase1"></p>
+  </div>
+
+  <div class="container hidden" id="fase2">
+    <h2>Organize as letras para descobrir a palavra:</h2>
+    <div class="letters" id="letrasOriginais"></div>
+    <div class="letters" id="alvo"></div>
+    <button onclick="verificarOrdem()">Verificar</button>
+    <button onclick="resetarOrdem()">Resetar</button>
+    <p class="error-message" id="erroFase2"></p>
+  </div>
+
+  <script>
+    const palavra = "INFO";
+    const letrasNecessarias = palavra.split('');
+    let letrasInseridas = [];
+
+    function adicionarLetra() {
+      const input = document.getElementById("letraInput");
+      const letra = input.value.toUpperCase();
+      const erro = document.getElementById("erroFase1");
+      erro.innerText = "";
+
+      if (letra && letrasInseridas.length < 4 && letrasNecessarias.includes(letra) && !letrasInseridas.includes(letra)) {
+        letrasInseridas.push(letra);
+        document.getElementById("letrasDigitadas").innerText = letrasInseridas.join(' ');
+        let faltam = 4 - letrasInseridas.length;
+        document.getElementById("statusLetras").innerText = faltam > 0 ? `Faltam ${
+          faltam
+        } letras...` : "Todas as letras encontradas!";
+        input.value = "";
+
+        if (letrasInseridas.length === 4) {
+          iniciarFase2();
+        }
+      } else {
+        erro.innerText = "Letra inválida, já inserida ou fora da lista.";
+      }
+    }
+
+    function iniciarFase2() {
+      document.getElementById("fase1").classList.add("hidden");
+      document.getElementById("fase2").classList.remove("hidden");
+      montarArranjo();
+    }
+
+    function montarArranjo() {
+      const origem = "FONI".split('');
+      const container = document.getElementById("letrasOriginais");
+      const alvo = document.getElementById("alvo");
+      container.innerHTML = "";
+      alvo.innerHTML = "";
+      document.getElementById("erroFase2").innerText = "";
+
+      origem.forEach((letra, index) => {
+        const span = document.createElement("span");
+        span.className = "letter";
+        span.innerText = letra;
+        span.setAttribute("draggable", "true");
+        span.id = "drag" + index;
+        span.ondragstart = dragStart;
+        container.appendChild(span);
+      });
+
+      for (let i = 0; i < 4; i++) {
+        const dz = document.createElement("div");
+        dz.className = "dropzone";
+        dz.ondragover = allowDrop;
+        dz.ondrop = drop;
+        alvo.appendChild(dz);
+      }
+    }
+
+    function allowDrop(e) {
+      e.preventDefault();
+    }
+
+    function dragStart(e) {
+      e.dataTransfer.setData("text", e.target.id);
+    }
+
+    function drop(e) {
+      e.preventDefault();
+      const data = e.dataTransfer.getData("text");
+      const dragged = document.getElementById(data);
+      if (e.target.classList.contains("dropzone") && e.target.children.length === 0) {
+        e.target.appendChild(dragged);
+      }
+    }
+
+    function verificarOrdem() {
+      const zonas = document.getElementById("alvo").children;
+      let palavraFormada = "";
+      for (let zona of zonas) {
+        if (zona.children.length === 0) {
+          document.getElementById("erroFase2").innerText = "Complete todos os espaços!";
+          return;
+        }
+        palavraFormada += zona.children[0].innerText;
+      }
+      if (palavraFormada === palavra) {
+        window.location.href = "qrcode.html";
+      } else {
+        document.getElementById("erroFase2").innerText = "Ordem incorreta. Tente novamente.";
+      }
+    }
+
+    function resetarOrdem() {
+      montarArranjo();
+    }
+  </script>
+</body>
+</html>

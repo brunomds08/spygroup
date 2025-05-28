@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Code Final</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: url('matrix.gif') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #00ff00;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Parabéns! Escaneie o QR Code:</h2>
+    <canvas id="qrcode"></canvas>
+  </div>
+
+  <script>
+    const conteudoQRCode = "https://exemplo.com/premio";
+    const canvas = document.getElementById("qrcode");
+
+    QRCode.toCanvas(canvas, conteudoQRCode, function (error) {
+      if (error) {
+        console.error(error);
+        alert("Erro ao gerar o QR Code");
+      }
+    });
+  </script>
+</body>
+</html>
