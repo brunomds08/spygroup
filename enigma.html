@@ -17,22 +17,32 @@
       color: #00ff00;
       flex-direction: column;
     }
-
     .container {
       background-color: rgba(0, 0, 0, 0.6);
       padding: 30px;
       border-radius: 10px;
       text-align: center;
     }
-
     .letters {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin-top: 20px;
       flex-wrap: wrap;
+      flex-direction: row; /* horizontal novamente */
     }
-
+    .keyboard {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+    .key-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
     .letter {
       padding: 15px;
       background-color: rgba(0, 0, 0, 0.5);
@@ -42,7 +52,6 @@
       font-size: 24px;
       touch-action: none;
     }
-
     .dropzone {
       border: 2px dashed #00ff00;
       min-width: 50px;
@@ -52,29 +61,13 @@
       font-size: 24px;
       line-height: 40px;
     }
-
     .error-message {
       margin-top: 15px;
       color: red;
       font-size: 16px;
     }
-
-    .keyboard {
-      margin-top: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .key-row {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .key, button {
-      width: 80px;
+    .key, .btn {
+      width: 40px;
       height: 40px;
       line-height: 40px;
       text-align: center;
@@ -85,7 +78,13 @@
       cursor: pointer;
       border: none;
     }
-
+    /* Nova classe de botões maiores */
+    .btn-large {
+      width: 120px;
+      height: 80px;
+      line-height: 80px;
+      margin-top: 15px;
+    }
     .hidden {
       display: none;
     }
@@ -93,7 +92,9 @@
 </head>
 <body>
   <div class="container" id="fase1">
-    <h2>Insira as letras que encontrou:</h2>
+    <h2>Processo de descriptografia em andamento...</h2>
+    <p>Utilize as pistas encontradas para neutralizar o ataque.</p>
+	<p>Mas CUIDADO: ao errar a entrada, o sistema tentará bloquear a invasão imediatamente!</p>
     <p id="statusLetras">Faltam 4 letras...</p>
     <p>Letras encontradas: <span id="letrasDigitadas"></span></p>
     <p class="error-message" id="erroFase1"></p>
@@ -101,11 +102,13 @@
   </div>
 
   <div class="container hidden" id="fase2">
-    <h2>Organize as letras para descobrir a palavra:</h2>
+    <h2>A palavra que você deve encontrar está no coração da troca de dados e mensagens. Organize as letras encontradas e desbloqueie o sistema de comunicação para impedir o ataque.</h2>
     <div class="letters" id="letrasOriginais"></div>
     <div class="letters" id="alvo"></div>
-    <button onclick="verificarOrdem()">Verificar</button>
-    <button onclick="resetarOrdem()">Resetar</button>
+    <div style="margin-top: 20px;">
+      <button class="btn btn-large" onclick="verificarOrdem()">Verificar</button>
+      <button class="btn btn-large" onclick="resetarOrdem()">Resetar</button>
+    </div>
     <p class="error-message" id="erroFase2"></p>
   </div>
 
@@ -113,6 +116,8 @@
     const palavra = "INFO";
     const letrasNecessarias = palavra.split('');
     let letrasInseridas = [];
+    let tentativasErradas = 0;
+    let cronometro;
 
     document.addEventListener("DOMContentLoaded", () => {
       const teclado = document.getElementById("tecladoVirtual");
@@ -128,9 +133,7 @@
           const tecla = document.createElement("div");
           tecla.className = "key";
           tecla.innerText = letra;
-          tecla.onclick = () => {
-            adicionarLetra(letra);
-          };
+          tecla.onclick = () => adicionarLetra(letra);
           linhaDiv.appendChild(tecla);
         });
         teclado.appendChild(linhaDiv);
@@ -140,19 +143,35 @@
     function adicionarLetra(letra) {
       const erro = document.getElementById("erroFase1");
       erro.innerText = "";
-
-      if (letra && letrasInseridas.length < 4 && letrasNecessarias.includes(letra) && !letrasInseridas.includes(letra)) {
+      if (letrasNecessarias.includes(letra) && !letrasInseridas.includes(letra)) {
         letrasInseridas.push(letra);
         document.getElementById("letrasDigitadas").innerText = letrasInseridas.join(' ');
-        let faltam = 4 - letrasInseridas.length;
-        document.getElementById("statusLetras").innerText = faltam > 0 ? `Faltam ${faltam} letras...` : "Todas as letras encontradas!";
-
-        if (letrasInseridas.length === 4) {
-          iniciarFase2();
-        }
+        document.getElementById("statusLetras").innerText = `Faltam ${4 - letrasInseridas.length} letras...`;
+        if (letrasInseridas.length === 4) iniciarFase2();
       } else {
-        erro.innerText = "Letra inválida, já inserida ou fora da lista.";
+        tentativasErradas++;
+        if (tentativasErradas >= 1) {
+          let tempoRestante = 180;
+          erro.innerText = `Atenção: Você errou. Sistema bloqueado por 3 minutos. Liberado em: ${formatarTempo(tempoRestante)}`;
+          document.querySelectorAll(".key").forEach(key => key.style.pointerEvents = "none");
+          cronometro = setInterval(() => {
+            tempoRestante--;
+            erro.innerText = `Atenção: Sistema bloqueado. Liberado em: ${formatarTempo(tempoRestante)}`;
+            if (tempoRestante <= 0) {
+              clearInterval(cronometro);
+              erro.innerText = "Você pode tentar novamente.";
+              document.querySelectorAll(".key").forEach(key => key.style.pointerEvents = "auto");
+              tentativasErradas = 0;
+            }
+          }, 1000);
+        }
       }
+    }
+
+    function formatarTempo(segundos) {
+      const m = String(Math.floor(segundos / 60)).padStart(2, '0');
+      const s = String(segundos % 60).padStart(2, '0');
+      return `${m}:${s}`;
     }
 
     function iniciarFase2() {
@@ -168,7 +187,6 @@
       container.innerHTML = "";
       alvo.innerHTML = "";
       document.getElementById("erroFase2").innerText = "";
-
       origem.forEach((letra, index) => {
         const span = document.createElement("span");
         span.className = "letter";
@@ -178,7 +196,6 @@
         span.ondragstart = dragStart;
         container.appendChild(span);
       });
-
       for (let i = 0; i < 4; i++) {
         const dz = document.createElement("div");
         dz.className = "dropzone";
@@ -188,14 +205,8 @@
       }
     }
 
-    function allowDrop(e) {
-      e.preventDefault();
-    }
-
-    function dragStart(e) {
-      e.dataTransfer.setData("text", e.target.id);
-    }
-
+    function allowDrop(e) { e.preventDefault(); }
+    function dragStart(e) { e.dataTransfer.setData("text", e.target.id); }
     function drop(e) {
       e.preventDefault();
       const data = e.dataTransfer.getData("text");
@@ -222,9 +233,7 @@
       }
     }
 
-    function resetarOrdem() {
-      montarArranjo();
-    }
+    function resetarOrdem() { montarArranjo(); }
   </script>
 </body>
 </html>

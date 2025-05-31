@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Spygroup</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background: url('matrix.gif') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #00ff00;
+    flex-direction: column;
+  }
+  .container {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    width: 90%;
+    max-width: 600px;
+  }
+  .keyboard {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    margin-top: 20px;
+  }
+  .letters-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .numbers-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .key-row {
+    display: flex;
+    gap: 10px;
+  }
+  .key {
+    width: 40px;
+    height: 40px;
+    background-color: #00ff00;
+    color: black;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+  }
+  .partes-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+  }
+  .parte {
+    width: 50px;
+    height: 40px;
+    line-height: 40px;
+    background-color: rgba(128, 128, 128, 0.4);
+    border-radius: 5px;
+    text-align: center;
+    font-size: 16px;
+    color: #00ff00;
+  }
+  .btn-large {
+    width: 120px;
+    height: 50px;
+    margin: 10px;
+    background-color: #00ff00;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .error-message {
+    margin-top: 10px;
+    color: red;
+    font-size: 14px;
+  }
+  .letters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .letter {
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px dashed #00ff00;
+    cursor: grab;
+    user-select: none;
+    font-size: 18px;
+    touch-action: none;
+  }
+  .dropzone {
+    border: 2px dashed #00ff00;
+    min-width: 50px;
+    min-height: 40px;
+    text-align: center;
+    font-size: 18px;
+    line-height: 40px;
+    margin: 5px;
+  }
+  .hidden {
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div class="container" id="fase1">
+  <h2>Infiltração em Progresso...</h2>
+  <p>O endereço MAC de cada dispositivo é importante para comunicações em rede.</p>
+  <p>O servidor-alvo só aceita conexões de dispositivos autorizados. Devemos usar um endereço conhecido e mascarar o nosso acesso por ele.</p>
+  <p>As partes do endereço MAC desse dispositivo estão espalhadas pela sala, mas não estão na ordem correta. Insira essas partes no sistema para iniciar a conexão segura.</p>
+  <p>Insira cada parte encontrada (formato hexadecimal, dois caracteres):</p>
+  <div class="parte" id="campoEntrada" style="margin: 10px auto;"></div>
+  <div class="keyboard">
+    <div class="letters-column">
+      <button class="key">A</button>
+      <button class="key">B</button>
+      <button class="key">C</button>
+    </div>
+    <div class="numbers-grid">
+      <div class="key-row">
+        <button class="key">7</button>
+        <button class="key">8</button>
+        <button class="key">9</button>
+      </div>
+      <div class="key-row">
+        <button class="key">4</button>
+        <button class="key">5</button>
+        <button class="key">6</button>
+      </div>
+      <div class="key-row">
+        <button class="key">1</button>
+        <button class="key">2</button>
+        <button class="key">3</button>
+      </div>
+      <div class="key-row">
+        <button class="key" style="width: 126px;">0</button>
+      </div>
+    </div>
+    <div class="letters-column">
+      <button class="key">D</button>
+      <button class="key">E</button>
+      <button class="key">F</button>
+    </div>
+  </div>
+  <div>
+    <button class="btn-large" onclick="validarParte()">Validar</button>
+    <button class="btn-large" onclick="resetarPartes()">Resetar</button>
+  </div>
+  <p class="error-message" id="mensagemErro"></p>
+  <p>Partes do endereço MAC encontradas:</p>
+  <div class="partes-container">
+    <div class="parte" id="parte1"></div>
+    <div class="parte" id="parte2"></div>
+    <div class="parte" id="parte3"></div>
+    <div class="parte" id="parte4"></div>
+    <div class="parte" id="parte5"></div>
+    <div class="parte" id="parte6"></div>
+  </div>
+</div>
+
+<div class="container hidden" id="fase2">
+  <h2>Montagem do Endereço MAC</h2>
+  <p>Arraste as partes para as posições corretas e desbloqueie o sistema. Organize conforme informações encontradas...</p>
+  <div class="letters" id="partesDesordenadas"></div>
+  <div class="letters" id="alvo"></div>
+  <button class="btn-large" onclick="verificarOrdem()">Verificar</button>
+  <button class="btn-large" onclick="resetarOrdem()">Resetar</button>
+  <p id="mensagemFinal"></p>
+</div>
+
+<script>
+const partesCorretas = ["14", "4B", "72", "96", "EA", "F4"];
+let partesInseridas = [];
+let indexParteAtual = 0;
+
+document.querySelectorAll(".key").forEach(btn => {
+  btn.onclick = () => adicionarTecla(btn.innerText);
+});
+
+function adicionarTecla(tecla) {
+  const campo = document.getElementById("campoEntrada");
+  if (campo.innerText.length < 2) {
+    campo.innerText += tecla;
+  }
+}
+
+function validarParte() {
+  const campo = document.getElementById("campoEntrada");
+  const valor = campo.innerText;
+  const mensagemErro = document.getElementById("mensagemErro");
+  if (valor.length === 2 && partesCorretas.includes(valor) && !partesInseridas.includes(valor)) {
+    document.getElementById(`parte${indexParteAtual+1}`).innerText = valor;
+    partesInseridas.push(valor);
+    indexParteAtual++;
+    campo.innerText = "";
+    mensagemErro.innerText = "";
+    if (partesInseridas.length === 6) {
+      iniciarFase2();
+    }
+  } else {
+    mensagemErro.innerText = "Parte inválida ou já inserida. Digite novamente.";
+    campo.innerText = "";
+  }
+}
+
+function resetarPartes() {
+  partesInseridas = [];
+  indexParteAtual = 0;
+  for (let i=1; i<=6; i++) {
+    document.getElementById(`parte${i}`).innerText = "";
+  }
+  document.getElementById("campoEntrada").innerText = "";
+  document.getElementById("mensagemErro").innerText = "";
+}
+
+function iniciarFase2() {
+  document.getElementById("fase1").classList.add("hidden");
+  document.getElementById("fase2").classList.remove("hidden");
+  montarArranjo();
+}
+
+function montarArranjo() {
+  const embaralhadas = partesInseridas.slice().sort(() => Math.random() - 0.5);
+  const container = document.getElementById("partesDesordenadas");
+  const alvo = document.getElementById("alvo");
+  container.innerHTML = "";
+  alvo.innerHTML = "";
+  document.getElementById("mensagemFinal").innerText = "";
+
+  embaralhadas.forEach((parte, index) => {
+    const span = document.createElement("span");
+    span.className = "letter";
+    span.innerText = parte;
+    span.setAttribute("draggable", "true");
+    span.id = "drag" + index;
+    span.ondragstart = dragStart;
+    container.appendChild(span);
+  });
+
+  for (let i = 0; i < 6; i++) {
+    const dz = document.createElement("div");
+    dz.className = "dropzone";
+    dz.ondragover = allowDrop;
+    dz.ondrop = drop;
+    alvo.appendChild(dz);
+  }
+}
+
+function allowDrop(e) { e.preventDefault(); }
+function dragStart(e) { e.dataTransfer.setData("text", e.target.id); }
+function drop(e) {
+  e.preventDefault();
+  const data = e.dataTransfer.getData("text");
+  const dragged = document.getElementById(data);
+  if (e.target.classList.contains("dropzone") && e.target.children.length === 0) {
+    e.target.appendChild(dragged);
+  }
+}
+
+function verificarOrdem() {
+  const zonas = document.getElementById("alvo").children;
+  let macFormado = "";
+  for (let zona of zonas) {
+    if (zona.children.length === 0) {
+      document.getElementById("mensagemFinal").innerText = "Preencha todos os espaços!";
+      return;
+    }
+    macFormado += zona.children[0].innerText + ":";
+  }
+  macFormado = macFormado.slice(0, -1);
+  const correto = partesCorretas.join(":");
+  if (macFormado === correto) {
+    document.getElementById("mensagemFinal").innerText = "Endereço correto! Sistema desbloqueado.";
+    setTimeout(() => window.location.href = "qrcode.html", 2000);
+  } else {
+    document.getElementById("mensagemFinal").innerText = "Endereço incorreto. Tente novamente.";
+  }
+}
+
+function resetarOrdem() {
+  montarArranjo();
+}
+</script>
+</body>
+</html>

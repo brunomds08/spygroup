@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>QR Code Final</title>
+  <title>Spygroup</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
     body {
@@ -17,14 +17,12 @@
       align-items: center;
       color: #00ff00;
     }
-
     .container {
       background-color: rgba(0, 0, 0, 0.6);
       padding: 30px;
       border-radius: 10px;
       text-align: center;
     }
-
     canvas {
       margin-top: 20px;
     }
@@ -32,15 +30,15 @@
 </head>
 <body>
   <div class="container">
-    <h2>Parabéns! Escaneie o QR Code:</h2>
+    <h2>O próximo passo está escondido...</h2>
+    <p>Encontre o dispositivo que revelará a mensagem deste QR code.</p>
     <canvas id="qrcode"></canvas>
   </div>
-
   <script>
-    const conteudoQRCode = "https://exemplo.com/premio";
-    const canvas = document.getElementById("qrcode");
+    const textoSecreto = `Em uma noite chuvosa, o espião silencioso conectou-se à rede para realizar uma troca de dados vital. Primeiro, ele fez o upload de três arquivos criptografados para a base inimiga, sinalizando o início de sua missão. Em seguida, ele baixou outros três arquivos sigilosos que guardavam segredos perigosos. Por fim, com as informações compiladas, ele subiu um último arquivo – o upload final que encerraria sua operação e abriria o caminho para a liberdade.`;
 
-    QRCode.toCanvas(canvas, conteudoQRCode, function (error) {
+    const canvas = document.getElementById("qrcode");
+    QRCode.toCanvas(canvas, textoSecreto, function (error) {
       if (error) {
         console.error(error);
         alert("Erro ao gerar o QR Code");
